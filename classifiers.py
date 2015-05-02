@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
-#!/usr/local/bin/python3.3
+# !/usr/local/bin/python3.3
 ####################################################
-#This file is part of MULLPY.
+# This file is part of MULLPY.
 #
 #    MULLPY is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ class Classifier:
         """
         classes_texts = context["classifiers"][classifier_name]["classes_names"]
         if "deployment" in context["execution_kind"]:
-        # if context["execution_kind"] == "deployment_classification":
+            # if context["execution_kind"] == "deployment_classification":
             len_inputs = len(patterns[0])
         else:
             len_inputs = len(patterns[0]) - len(classes_texts)
@@ -131,8 +131,10 @@ class Classifier:
         i = 0
         early_stopping = context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"]["activate"]
         if context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"]["activate"]:
-            learning_percent = context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"]["learning"]
-            validation_percent = context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"]["validation"]
+            learning_percent = context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"][
+                "learning"]
+            validation_percent = context["classifiers"][classifier_name]["learning_algorithm"]["early_stopping"][
+                "validation"]
             best_error = 10000000.
             iteration_best_error = 0
             validation_error = 10000000.
@@ -179,7 +181,8 @@ class Classifier:
             if early_stopping:
                 stop_criteria_error = learning_percent * learning_error + validation_percent * validation_error
 
-            if early_stopping and stop_criteria_error < best_error and context["execution_kind"] == "learning" and epochs > 1:
+            if early_stopping and stop_criteria_error < best_error and context[
+                "execution_kind"] == "learning" and epochs > 1:
                 iteration_best_error = i
                 best_error = stop_criteria_error
                 best_classifier = copy.deepcopy(context["classifiers"][classifier_name]["instance"])
@@ -196,7 +199,8 @@ class Classifier:
                         str(iteration_best_error + 1)))
                     context["classifiers"][classifier_name]["learning_algorithm"]["parameters"][
                         "epochs"] = iteration_best_error + 1
-                    context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["objetive_error"] = best_error
+                    context["classifiers"][classifier_name]["learning_algorithm"]["parameters"][
+                        "objetive_error"] = best_error
                     context["classifiers"][classifier_name]["instance"] = best_classifier
                 else:
                     information.build_real_outputs(context, classifier_name, "learning")
@@ -244,6 +248,7 @@ class Classifier:
             w = pickle.load(f)
         except ValueError:
             import os
+
             print("Found a different pickle protocol and proceeding to remove the old/new by the present protocol.")
             os.remove(context["classifiers"][classifier_name]["config_file"])
             error = "Error loading the file of the classifier {0}. Just restart the process".format(classifier_name)
@@ -253,6 +258,7 @@ class Classifier:
         f.close()
 
         return w
+
 
 ####################################################
 
@@ -427,6 +433,7 @@ class MLP(Classifier):
     def predict(self, context, classifier_name, inputs):
         return [y for x in self.classifier.sim([inputs]) for y in x]
 
+
 ####################################################
 
 
@@ -443,6 +450,7 @@ class Cutoff(Classifier):
 
     def core_learning(self, context, classifier_name, **kwargs):
         pass
+
 
 ####################################################
 
@@ -477,12 +485,14 @@ class Sklearn(Classifier):
 
         self.classifier.fit(inputs, outputs)
 
+
 ####################################################
 
 
 class RandomForestRegressor(Sklearn):
     def __init__(self, context, classifier_name):
         from sklearn.ensemble import RandomForestRegressor
+
         self.classifier = RandomForestRegressor(
             n_estimators=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["n_estimators"],
             criterion=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["criterion"],
@@ -515,6 +525,7 @@ class RandomForestRegressor(Sklearn):
 
         self.classifier.fit(inputs, outputs)
 
+
 ####################################################
 
 
@@ -534,11 +545,13 @@ class ExtraTreesClassifier(Sklearn):
             bootstrap=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["bootstrap"],
             random_state=None,
             compute_importances=None)
+
     ####################################################
 
     def predict(self, context, classifier_name, inputs):
         outputs = [y[1] for x in self.classifier.predict_proba([inputs]) for y in x]
         return outputs
+
 
 ####################################################
 
@@ -593,6 +606,7 @@ class RandomTreesEmbedding(Sklearn):
                 "min_samples_leaf"],
             random_state=None)
 
+
 ####################################################
 
 
@@ -617,6 +631,7 @@ class RandomForestClassifier(Sklearn):
     def predict(self, context, classifier_name, inputs):
         outputs = [y[1] for x in self.classifier.predict_proba([inputs]) for y in x]
         return outputs
+
 
 ####################################################
 
@@ -653,6 +668,7 @@ class GradientBoostingClassifier(Sklearn):
         outputs = self.classifier.predict_proba([inputs])[0]
         return outputs
 
+
 ####################################################
 
 
@@ -671,7 +687,8 @@ class GradientBoostingRegressor(Sklearn):
                 "min_samples_leaf"],
             max_depth=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["max_depth"],
             max_features=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["max_features"],
-            )
+        )
+
     ####################################################
 
     def predict(self, context, classifier_name, inputs):
@@ -688,6 +705,7 @@ class GradientBoostingRegressor(Sklearn):
         outputs = [x[0] for x in
                    context["patterns"].patterns[classifier_name]["learning"][:, range(len_inputs, total_len)]]
         self.classifier.fit(inputs, outputs)
+
 
 ####################################################
 
@@ -710,6 +728,7 @@ class RadiusNeighborsClassifier(Sklearn):
         outputs = [x[0] for x in self.classifier.predict([inputs])]
         return outputs
 
+
 ####################################################
 
 
@@ -730,6 +749,7 @@ class KNeighborsClassifier(Sklearn):
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
 
+
 ####################################################
 
 
@@ -749,6 +769,7 @@ class KNeighborsRegressor(Sklearn):
 
     def predict(self, context, classifier_name, inputs):
         return [x[0] for x in self.classifier.predict([inputs])]
+
 
 ####################################################
 
@@ -771,11 +792,12 @@ class Gaussian(Sklearn):
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
 
+
 ####################################################
 
 
 class SVR(Sklearn):
-####################################################
+    ####################################################
     def __init__(self, context, classifier_name):
         from sklearn.svm import SVR
 
@@ -811,11 +833,11 @@ class SVR(Sklearn):
 
         self.classifier.fit(inputs, outputs)
 
-    ####################################################
+        ####################################################
 
 
 class NuSVC(Sklearn):
-####################################################
+    ####################################################
     def __init__(self, context, classifier_name):
         from sklearn.svm import NuSVC
 
@@ -856,7 +878,7 @@ class NuSVC(Sklearn):
 
 
 class SVM(Sklearn):
-####################################################
+    ####################################################
     def __init__(self, context, classifier_name):
         from sklearn.svm import SVC
 
@@ -922,6 +944,7 @@ class GaussianNB(Sklearn):
         outputs = [x for x in self.classifier.predict_proba([inputs])[0]]
         return outputs
 
+
 ####################################################
 
 
@@ -949,6 +972,7 @@ class BernoulliNB(Sklearn):
         outputs = [x for x in self.classifier.predict_proba([inputs])[0]]
         return outputs
 
+
 ####################################################
 
 
@@ -974,6 +998,7 @@ class MultinomialNB(Sklearn):
 
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict_proba([inputs])[0]]
+
 
 ####################################################
 
@@ -1002,6 +1027,7 @@ class DTClassifier(Sklearn):
 
     def predict(self, context, classifier_name, inputs):
         return [y[1] for x in self.classifier.predict_proba([inputs]) for y in x]
+
 
 #######################################################################
 
@@ -1085,6 +1111,7 @@ class DTR(Sklearn):
         output = [x for x in self.classifier.predict([inputs])]
         return output
 
+
 #######################################################################
 
 
@@ -1105,6 +1132,7 @@ class ETRegressor(Sklearn):
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
 
+
 #######################################################################
 
 
@@ -1119,6 +1147,7 @@ class LM_LinearRegression(Sklearn):
 
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
+
 
 #######################################################################
 
@@ -1135,12 +1164,13 @@ class ARDRegression(Sklearn):
                 alpha_2=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["alpha_2"],
                 lambda_1=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["lambda_1"],
                 lambda_2=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["lambda_2"],
-                )
+            )
 
     ####################################################
 
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
+
 
 #######################################################################
 
@@ -1177,6 +1207,7 @@ class BayesianRidge(Sklearn):
         output = [x for x in self.classifier.predict([inputs])]
         return output
 
+
 #######################################################################
 
 
@@ -1189,11 +1220,13 @@ class Ridge(Sklearn):
                   copy_X=True,
                   solver=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["solver"],
                   tol=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["tol"]
-            )
+                  )
+
     ####################################################
 
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
+
 
 #######################################################################
 
@@ -1213,6 +1246,7 @@ class Lasso(Sklearn):
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
 
+
 #######################################################################
 
 
@@ -1226,10 +1260,12 @@ class ElasticNet(Sklearn):
                 l1_ratio=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["l1_ratio"],
                 tol=context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["tol"]
             )
+
     ####################################################
 
     def predict(self, context, classifier_name, inputs):
         return [x for x in self.classifier.predict([inputs])[0]]
+
 
 #######################################################################
 
@@ -1270,8 +1306,8 @@ class NN(Classifier):
 
         self.w = []
         #One layer minus of weights than activations
-        low_interval_initialization = -np.sqrt(6./(self.ni+self.no))
-        high_interval_initialization = np.sqrt(6./(self.ni+self.no))
+        low_interval_initialization = -np.sqrt(6. / (self.ni + self.no))
+        high_interval_initialization = np.sqrt(6. / (self.ni + self.no))
 
         for number_layer, elements in zip(range(len(self.layers) - 1), self.layers):
             self.w.append(np.random.uniform(low_interval_initialization,
@@ -1415,6 +1451,7 @@ class Hybrid(Classifier):
         for i, classifier_name in enumerate(context["classifiers"][classifier_name]["classifier_kind"]["Hybrid"]):
             context["classifiers"][classifier_name]["instance"].core_learning(context, classifier_name, **kwargs)
 
+
 #######################################################################
 
 
@@ -1438,6 +1475,7 @@ class Grossberg(Classifier):
 
     def learning(self, context, classifier_name):
         return 0.0
+
 
 #######################################################################
 

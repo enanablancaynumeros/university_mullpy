@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
-#!/usr/local/bin/python3.3
+# !/usr/local/bin/python3.3
 ####################################################
-#<Copyright (C) 2012, 2013, 2014 Yeray Alvarez Romero>
-#This file is part of MULLPY.
+# <Copyright (C) 2012, 2013, 2014 Yeray Alvarez Romero>
+# This file is part of MULLPY.
 ####################################################
 import numpy as np
 from patterns import Pattern
@@ -128,12 +128,12 @@ class PreProcess():
         filters["validation"] = []
         if activate is not 0:
             for fold in range(folds):
-                filters["learning"].append([i for i in range(fold*validation_size,
-                                                                       len(data_set)-validation_size*(folds-fold))])
+                filters["learning"].append([i for i in range(fold * validation_size,
+                                                             len(data_set) - validation_size * (folds - fold))])
 
-                filters["validation"].append([i for i in range(len(data_set)-validation_size*(folds-fold),
-                                                                         len(data_set)-validation_size*(folds-fold) +
-                                                                         validation_size)])
+                filters["validation"].append([i for i in range(len(data_set) - validation_size * (folds - fold),
+                                                               len(data_set) - validation_size * (folds - fold) +
+                                                               validation_size)])
         else:
             filters["learning"].append([i for i in range(0, len(data_set) - validation_size)])
             filters["validation"].append([i for i in range(len(data_set) - validation_size, len(data_set))])
@@ -341,7 +341,7 @@ class PreProcess():
             ###Common functions###
         elif "bagging" in context["preprocess"]["random_distribution"] and \
                 context["preprocess"]["random_distribution"]["bagging"]["activate"] \
-            or "pasting_Rvotes" in context["preprocess"]["random_distribution"] and \
+                or "pasting_Rvotes" in context["preprocess"]["random_distribution"] and \
                         context["preprocess"]["random_distribution"]["pasting_Rvotes"]["activate"]:
             if context["preprocess"]["random_distribution"]["group_successive"]:
                 for kind_of in filters:
@@ -371,8 +371,10 @@ class PreProcess():
 
                     if "random_subspaces" in context["preprocess"]["random_distribution"] and \
                             context["preprocess"]["random_distribution"]["random_subspaces"]["activate"] or \
-                        "all_features_combination" in context["preprocess"]["random_distribution"] and \
-                            context["preprocess"]["random_distribution"]["all_features_combination"]["activate"]:
+                                            "all_features_combination" in context["preprocess"][
+                                        "random_distribution"] and \
+                                    context["preprocess"]["random_distribution"]["all_features_combination"][
+                                        "activate"]:
                         temporal_pattern = context["patterns"].patterns[classifier_name][pattern_kind]
                         new_pattern = context["patterns"]. \
                             filter_characteristics(classifier_name, pattern_kind, filters[pattern_kind][number])
@@ -391,6 +393,7 @@ class PreProcess():
     @staticmethod
     def create_data_transformer(classifier_name, context, list_divided):
         from auxiliar import check_equal_classifier_patterns
+
         for pattern_kind in context["patterns_texts"]:
             for classifier_name_2 in list_divided:
                 if check_equal_classifier_patterns(context, classifier_name, classifier_name_2, pattern_kind):
@@ -537,7 +540,7 @@ class PreProcess():
         if not context["preprocess"]["points2series"]["to_csv"]:
             os.remove(file_name)
         # Displaying info
-        serie_name = output_file[output_file.rfind("/")+1:]
+        serie_name = output_file[output_file.rfind("/") + 1:]
         serie_path = output_file[:output_file.rfind("/")]
         if "deployment" not in context["execution_kind"]:
             print("\n%s pattern files built at %s" % (serie_name, serie_path))

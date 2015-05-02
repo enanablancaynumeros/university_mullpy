@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
-#!/usr/local/bin/python3.3
+# !/usr/local/bin/python3.3
 ####################################################
-#<Copyright (C) 2012, 2013, 2014 Yeray Alvarez Romero>
-#This file is part of MULLPY.
+# <Copyright (C) 2012, 2013, 2014 Yeray Alvarez Romero>
+# This file is part of MULLPY.
 ####################################################
 from auxiliar import AutoVivification, path_exists
 import copy
