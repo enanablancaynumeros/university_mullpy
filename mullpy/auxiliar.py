@@ -6,7 +6,12 @@
 ####################################################
 import os
 import errno
+from functools import reduce
 ####################################################
+
+
+def nested_dict_access(list_of_keys, dictionary):
+    return reduce(dict.get, list_of_keys, dictionary)
 
 
 def create_output_file(folder, output_file, operation, user_default_input):

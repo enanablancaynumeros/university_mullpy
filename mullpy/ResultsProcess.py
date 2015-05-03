@@ -80,7 +80,7 @@ def features_ranking(file_name, ranking):
 
 
 def structure_combined_features():
-    from auxiliar import AutoVivification
+    from mullpy.auxiliar import AutoVivification
 
     structure = AutoVivification()
     i = 0
@@ -269,6 +269,7 @@ def ensembles_summary_cv(folder_path, member_range, fold_range):
             if control == 0:
                 cv_summary[name] = summary_total_dict[classifier_name]
     # Calculating mean and exporting results into a file
+    f_out = ""
     output_file = open(f_out, "w")
     for ensemble in reversed([x for x in sorted(cv_summary.keys(), key=lambda y: cv_summary[y])]):
         cv_summary[ensemble] /= len(fold_range)
@@ -279,8 +280,8 @@ def ensembles_summary_cv(folder_path, member_range, fold_range):
 
 
 def create_file_given_classifiers_names(folder, output_file, classifier_list):
-    import auxiliar
-    f_out = auxiliar.create_output_file(folder, output_file, "append", "y")
+    from mullpy.auxiliar import create_output_file
+    f_out = create_output_file(folder, output_file, "append", "y")
     if not f_out:
         raise ValueError("File %s could not be created" % folder+output_file)
     for classifier_name in classifier_list:
@@ -302,10 +303,10 @@ def get_next_element(iterator_generated):
 def generate_ensembles_combination_from_classifier_file(folder, input_file, user_given_amounts):
     classifiers_file = open(folder + input_file)
     classifiers_selected = [name[:-1] for name in classifiers_file.readlines()]
-    import mullpy
+    from mullpy.mullpy_core import Process
 
     for amount in user_given_amounts:
-        classifier_list = mullpy.Process.automatic_ensemble_generation(classifiers_selected, [amount])
+        classifier_list = Process.automatic_ensemble_generation(classifiers_selected, [amount])
         for classifier_generator in classifier_list:
             # next_element = get_next_element(classifier_generator)
             for next_element in classifier_generator:

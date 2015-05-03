@@ -6,7 +6,7 @@
 ####################################################
 import copy
 from itertools import permutations
-from mullpy.statistics import Statistic
+from mullpy.statistics import Statistics
 
 import numpy as np
 
@@ -40,7 +40,7 @@ class ClassifiersInfo:
             temp = np.zeros(len(classes_list), dtype=np.float32)
             for j, value in enumerate(classes_list):
                 if context["classifiers"][classifier_name]["patterns"]["range"] is not [0, 1]:
-                    value = Statistic().change_ranges(
+                    value = Statistics().change_ranges(
                         value,
                         oldMin=context["classifiers"][classifier_name]["patterns"]["range"][0],
                         oldMax=context["classifiers"][classifier_name]["patterns"]["range"][1],
@@ -120,7 +120,7 @@ class ClassifiersInfo:
         """
             With the discretized outputs for roc values, determine the best values for the threshold.
             """
-        statistic_class = Statistic()
+        statistics_class = Statistics()
         #Aux structures
         threshold_list = AutoVivification()
         minimum_error = AutoVivification()
@@ -135,13 +135,13 @@ class ClassifiersInfo:
             #For each value of threshold generated
         for threshold in self.info[classifier_name]["roc_outputs"]:
             #Calculate the goodness of the classifier
-            statistic_class.goodness(context, classifier_name, self.info[classifier_name]["roc_outputs"][threshold],
+            statistics_class.goodness(context, classifier_name, self.info[classifier_name]["roc_outputs"][threshold],
                                      patterns_outputs)
             for class_text in context["classifiers"][classifier_name]["classes_names"]:
                 error = 0.0
                 for function in context["classifiers"][classifier_name]["thresholds"]["metric"]:
-                    getattr(statistic_class, function)(classifier_name, context, self, "validation")
-                    error += statistic_class.measures[classifier_name][class_text][function]
+                    getattr(statistics_class, function)(classifier_name, context, self, "validation")
+                    error += statistics_class.measures[classifier_name][class_text][function]
                 #If we find a minimum error, we save it
                 if error < minimum_error[class_text]:
                     minimum_error[class_text] = error
@@ -226,13 +226,13 @@ class ClassifiersInfo:
         for component in context["classifiers"][classifier_name]["classes_names"]:
             self.info[classifier_name][component]['tpr'] = np.zeros(len_outputs, dtype=np.float32)
             self.info[classifier_name][component]['tnr'] = np.zeros(len_outputs, dtype=np.float32)
-        statistic_class = Statistic()
+        statistics_class = Statistics()
 
         for i, threshold in enumerate(sorted(self.info[classifier_name]["roc_outputs"])):
-            statistic_class.goodness(context, classifier_name, self.info[classifier_name]["roc_outputs"][threshold],
+            statistics_class.goodness(context, classifier_name, self.info[classifier_name]["roc_outputs"][threshold],
                                      pattern_outputs)
-            statistic_class.tpr(classifier_name, context)
-            statistic_class.tnr(classifier_name, context)
+            statistics_class.tpr(classifier_name, context)
+            statistics_class.tnr(classifier_name, context)
 
     #######################################################################
 
@@ -240,7 +240,7 @@ class ClassifiersInfo:
 
         self.info[classifier_name]["selection_errors"] = []
 
-        statistic_class = Statistic()
+        statistics_class = Statistics()
         values = AutoVivification()
         pattern_kind = context["pattern_kind"]
         outputs_kind = context["outputs_kind"]
@@ -274,9 +274,9 @@ class ClassifiersInfo:
                     [original[i] for i in range(len(original)) if i in positions]
                 ref_patterns = [original_pattern_ref[i] for i in range(len(original_pattern_ref)) if i in positions]
 
-            statistic_class.goodness(context, classifier_name, self.info[classifier_name][outputs_kind][
+            statistics_class.goodness(context, classifier_name, self.info[classifier_name][outputs_kind][
                 pattern_kind], ref_patterns)
-            self.info[classifier_name]["selection_errors"].append(statistic_class.measures[classifier_name]['E'])
+            self.info[classifier_name]["selection_errors"].append(statistics_class.measures[classifier_name]['E'])
 
             if classifier_name in context["classifier_list"]:
                 #Recovery the original patterns
@@ -295,7 +295,7 @@ class ClassifiersInfo:
         """
             Measure the error of the classifier giving a list of instances to check.
             """
-        statistic_class = Statistic()
+        statistics_class = Statistics()
         self.info[classifier_name]["selection_errors"] = []
         pattern_kind = context["pattern_kind"]
 
@@ -323,15 +323,15 @@ class ClassifiersInfo:
                     [original[i] for i in range(len(original)) if i in filter_list]
                 ref_patterns = [original_pattern_ref[i] for i in range(len(original_pattern_ref)) if i in filter_list]
 
-            statistic_class.goodness(context, classifier_name, self.info[classifier_name][outputs_kind][
+            statistics_class.goodness(context, classifier_name, self.info[classifier_name][outputs_kind][
                 pattern_kind], ref_patterns)
 
             if counter == 0:
                 self.info[classifier_name]["selection_errors"].append(
-                    [statistic_class.measures[classifier_name][x]['EFP'] for x in context["filter_component"]])
+                    [statistics_class.measures[classifier_name][x]['EFP'] for x in context["filter_component"]])
             else:
                 self.info[classifier_name]["selection_errors"].append(
-                    [statistic_class.measures[classifier_name][x]['EFN'] for x in context["filter_component"]])
+                    [statistics_class.measures[classifier_name][x]['EFN'] for x in context["filter_component"]])
                 #Recovery the original patterns
 
             if classifier_name in context["classifier_list"]:

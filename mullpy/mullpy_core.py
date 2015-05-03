@@ -44,7 +44,7 @@ class Process:
         self.execution_list = ["preprocess", "reconfiguring", "learning", "results", "deployment_classification",
                                "deployment_regression"]
         self.manage_execution_kind_error()
-        #If a classifier has classifiers means that is an ensemble
+        # If a classifier has classifiers means that is an ensemble
 
         self.context["classifier_list"] = [x for x in self.context["classifiers"].keys() if
                                            "classifiers" not in self.context["classifiers"][x].keys()]
@@ -52,11 +52,11 @@ class Process:
         self.context["ensemble_list"] = [x for x in self.context["classifiers"].keys() if
                                          "classifiers" in self.context["classifiers"][x].keys()]
         self.order_classifier_list()
-        #TODO: create a standard for the classifiers names
-        #TODO: order the names of classifiers by default taking into account learning names and others criteria
-        #TODO: Load classifiers when negative correlation learning is in execution. Means adding new members to the ensemble.
+        # TODO: create a standard for the classifiers names
+        # TODO: order the names of classifiers by default taking into account learning names and others criteria
+        # TODO: Load classifiers when negative correlation learning is in execution. Add new members to the ensemble.
         self.ensemble_learning_process_names = ["NClearning", "RNClearning"]
-        #Pattern structure initialization
+        # Pattern structure initialization
         self.context["patterns"] = Pattern(self.context)
         self.pattern_range_check()
         # self.init_parallelized_classifiers(self.context["classifier_list"], None)
@@ -70,6 +70,7 @@ class Process:
                                        objectives=[self.context["classifiers"], self.context["patterns"].patterns],
                                        recolect=1,
                                        by_elements=1)
+
     ####################################################
 
     def recursive_check_info_structure_and_append(self, objective, results):
@@ -117,7 +118,7 @@ class Process:
 
         Objectives must be defined in the same order that the child process write the objects list in the out_q
         """
-        #TODO: dynamically distribute the classifiers in list. Process may finish before others
+        # TODO: dynamically distribute the classifiers in list. Process may finish before others
         procs = AutoVivification()
         out_q = AutoVivification()
 
@@ -140,7 +141,7 @@ class Process:
             for pos in procs:
                 if kwargs["recolect"]:
                     if "by_elements" in kwargs:
-                        #Recollect all classifier results
+                        # Recollect all classifier results
                         for classifier in working_list[pos]:
                             for result, objective in zip(self.manage_get_queue(out_q, pos), kwargs["objectives"]):
                                 if None not in result:
@@ -218,17 +219,17 @@ class Process:
             self.define_file_paths(classifier_name)
             self.check_config_files(classifier_name)
             if classifier_name not in self.context["classifier_list"]:
-                #If the classifier was removed from the check_config_files function then jump iteration
+                # If the classifier was removed from the check_config_files function then jump iteration
                 if out_q is not None:
                     list_to_write = [[None], [None]]
                     self.manage_write_queue_child(out_q, list_to_write)
                 continue
 
-            #Check and build patterns structure
+            # Check and build patterns structure
             self.check_patterns_files(classifier_name)
             self.patterns_files_extract(classifier_name, list_divided)
 
-            #CALL CLASSIFIER CLASS CONSTRUCTOR#
+            # CALL CLASSIFIER CLASS CONSTRUCTOR#
             #Some classifiers needs first the patterns extracted to define somethings like the number of
             # inputs in NN case
             self.base_classifier_scheduler_constructor(classifier_name)
@@ -242,8 +243,8 @@ class Process:
     #########################################################################
 
     # def points_to_classifier_order(self, y):
-    #     """
-    #     Return a list of integers to order the classifier_list
+    # """
+    # Return a list of integers to order the classifier_list
     #     """
     #     l = []
     #     while y.find("_") is not -1:
@@ -257,17 +258,17 @@ class Process:
             try:
                 self.context["classifier_list"] = \
                     [x for x in sorted(self.context["classifier_list"], key=lambda y: (y
-                        # self.points_to_classifier_order(y)
-                        # int(y[re.search(r'[0-9]+', y).start():re.search(r'[0-9]+', y).end()]),
-                        # int(y[y.find("_") + 1:y.find("_", y.find("_") + 1)]),
-                        # int(y[y.find("-", y.find("-") + 1) + 1:])
-                    ))
-                    ]
+                                                                                       # self.points_to_classifier_order(y)
+                                                                                       # int(y[re.search(r'[0-9]+', y).start():re.search(r'[0-9]+', y).end()]),
+                                                                                       # int(y[y.find("_") + 1:y.find("_", y.find("_") + 1)]),
+                                                                                       # int(y[y.find("-", y.find("-") + 1) + 1:])
+                                                                                       ))
+                     ]
             except:
                 self.context["classifier_list"] = \
                     [x for x in sorted(self.context["classifier_list"], key=lambda y:
                     int(y[re.search(r'[0-9]+', y).start():re.search(r'[0-9]+', y).end()]))
-                    ]
+                     ]
 
     #########################################################################
 
@@ -291,11 +292,11 @@ class Process:
         self.context["classifiers"][classifier_name]["paths"]["patterns"] = \
             self.context["general_path"] + "patterns/" + self.context["classifiers"][classifier_name][
                 "set"] + '/'
-        #Check path and create if doesnt exists
+        # Check path and create if doesnt exists
         path_exists(self.context["classifiers"][classifier_name]["paths"]["results"])
         path_exists(self.context["classifiers"][classifier_name]["paths"]["config_file"])
         path_exists(self.context["classifiers"][classifier_name]["paths"]["patterns"])
-        #Define files names
+        # Define files names
         self.context["classifiers"][classifier_name]["results"] = \
             self.context["classifiers"][classifier_name]["paths"]["results"] + self.context[
                 "pattern_kind"] + "_" + classifier_name + "_" + self.context["result_name"]
@@ -311,7 +312,7 @@ class Process:
             self.context["classifiers"][classifier_name]["paths"]["config_file"] + classifier_name + ".dat"
         if os.path.isfile(self.context["classifiers"][classifier_name]["config_file"]):
             self.context["classifiers"][classifier_name]["overwrite"] = 0
-            #If the execution implies modifying the file
+            # If the execution implies modifying the file
             if "learning" in self.context["execution_kind"]:
                 if self.context["execution_kind"] not in self.ensemble_learning_process_names:
                     if not self.context["automatic_continue_learning"]:
@@ -341,11 +342,11 @@ class Process:
     #########################################################################
 
     def check_patterns_files(self, classifier_name):
-        #Patterns files checks
+        # Patterns files checks
         for file_type in self.context["patterns_texts"]:
             if self.context["classifiers"][classifier_name]["paths"]["patterns"] not in \
                     self.context["classifiers"][classifier_name]["patterns"][file_type]:
-                #TODO: solve the problem that causes the re edition of the pattern path
+                # TODO: solve the problem that causes the re edition of the pattern path
                 self.context["classifiers"][classifier_name]["patterns"][file_type] = \
                     self.context["classifiers"][classifier_name]["paths"]["patterns"] + \
                     self.context["classifiers"][classifier_name]["patterns"][file_type]
@@ -369,7 +370,7 @@ class Process:
             for classifier_name in self.context["classifiers"][ensemble_name]["classifiers"]:
                 if class_text in self.context["classifiers"][classifier_name]["classes_names"]:
                     if classifier_name not in min_classifiers_list:
-                        #Classes would be repeated among classifiers of this list
+                        # Classes would be repeated among classifiers of this list
                         min_classifiers_list.append(classifier_name)
                 if len(self.context["classifiers"][classifier_name]["classes_names"]) != len(
                         self.context["classifiers"][ensemble_name]["classes_names"]):
@@ -391,8 +392,8 @@ class Process:
                     values[i] = 1
 
         if np.sum(values) != len(values):
-            if not self.context["ensembles_combination_on_fly"]["activate"] and \
-                            "deployment" not in self.context["execution_kind"]:
+            if not self.context["ensembles_combination_on_fly"]["activate"] and "deployment" not in \
+                    self.context["execution_kind"]:
                 raise ValueError(
                     "Members of Ensemble %s does not contain the classes %s that is present in the ensemble"
                     % (ensemble_name,
@@ -414,7 +415,7 @@ class Process:
                 if "deployment" not in self.context["execution_kind"]:
                     PreProcess().create_data_transformation([classifier_name], list_divided, None, self.context)
                 else:
-                    #Means we are in deployment so the transformation will occur in deployment_classification
+                    # Means we are in deployment so the transformation will occur in deployment_classification
                     return
 
             PreProcess().apply_data_transformation(classifier_name, self.context, pattern_kind)
@@ -422,10 +423,9 @@ class Process:
     #########################################################################
 
     def patterns_files_extract(self, classifier_name, list_divided):
-        ############################
-        ##Extract patterns and kind#
-        ############################
+        # Extract patterns and kind
         from mullpy.auxiliar import check_equal_classifier_patterns
+
         if classifier_name in self.context["classifier_list"]:
             for pattern_kind in self.context["patterns_texts"]:
                 # if not self.context["results"]["instances_error"]["activate"] and not \
@@ -448,7 +448,7 @@ class Process:
 
                 if self.context["patterns"].patterns[classifier_name][pattern_kind] is None:
                     self.context["patterns"].extract(self.context, classifier_name, pattern_kind)
-                    #Build the transformer if corresponds and transform it, only if it is the first classifier in
+                    # Build the transformer if corresponds and transform it, only if it is the first classifier in
                     # creating a shared pattern or if the pattern is exclusive of this classifier
                     self.data_preprocess_transformation(classifier_name, list_divided, pattern_kind)
 
@@ -469,7 +469,7 @@ class Process:
 
     def check_patterns_dimensions_classifiers_configuration(self, classifier_name):
         classes_texts = self.context["classifiers"][classifier_name]["classes_names"]
-        #Check that all patterns files has the same number of inputs
+        # Check that all patterns files has the same number of inputs
         for pattern_kind in self.context["patterns_texts"]:
             if "deployment" in self.context["execution_kind"]:
                 if pattern_kind != "test":
@@ -526,24 +526,24 @@ class Process:
         for classifier_name in self.context["classifier_list"]:
             try:
                 if "transfer_function" in self.context["classifiers"][classifier_name]["classifier_kind"]:
-                    #If empty, create default range
+                    # If empty, create default range
                     if type(self.context["classifiers"][classifier_name]["classifier_kind"]["transfer_function"]) \
                             == AutoVivification:
                         self.context["classifiers"][classifier_name]["patterns"]["range"] = [0, 1]
                     else:
-                        if self.context["classifiers"][classifier_name]["classifier_kind"][
-                            "transfer_function"] in range_1_1:
+                        if self.context["classifiers"][classifier_name]["classifier_kind"]["transfer_function"] in \
+                                range_1_1:
                             self.context["classifiers"][classifier_name]["patterns"]["range"] = [-1, 1]
-                        elif self.context["classifiers"][classifier_name]["classifier_kind"][
-                            "transfer_function"] in range_0_1:
+                        elif self.context["classifiers"][classifier_name]["classifier_kind"]["transfer_function"] in \
+                                range_0_1:
                             self.context["classifiers"][classifier_name]["patterns"]["range"] = [0, 1]
                         else:
-                            raise ValueError(
-                                "Function not defined in pattern range check or even not implemented in classifiers")
+                            msg = "Function not defined in pattern range check or even not implemented in classifiers"
+                            raise ValueError(msg)
                 else:
                     if "kernel" in self.context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]:
                         self.context["classifiers"][classifier_name]["patterns"]["range"] = [0, 1]
-                    #If empty, create default range
+                    # If empty, create default range
                     else:
                         self.context["classifiers"][classifier_name]["patterns"]["range"] = [0, 1]
             except:
@@ -552,7 +552,7 @@ class Process:
                 else:
                     self.context["classifiers"][classifier_name]["patterns"]["range"] = [0, 1]
 
-        #TODO: Problems with ensembles that has classifiers with different ranges
+        # TODO: Problems with ensembles that has classifiers with different ranges
         for ensemble_name in self.context["ensemble_list"]:
             if "patterns" not in self.context["classifiers"][ensemble_name].keys():
                 self.context["classifiers"][ensemble_name]["patterns"] = {}
@@ -602,8 +602,7 @@ class Process:
     #########################################################################
 
     def ensemble_generation(self):
-        if "ensembles_combination_on_fly" in self.context and self.context["ensembles_combination_on_fly"][
-            "activate"]:
+        if "ensembles_combination_on_fly" in self.context and self.context["ensembles_combination_on_fly"]["activate"]:
             #  Taking each classifier from list
             classifier_list = self.automatic_ensemble_generation(
                 self.context["classifier_list"],
@@ -643,7 +642,8 @@ class Process:
                 self.context,
                 classifier_name,
                 information.info[classifier_name]["discretized_outputs"][pattern_kind],
-                self.context["patterns"].patterns[classifier_name][pattern_kind])
+                self.context["patterns"].patterns[classifier_name][pattern_kind]
+            )
 
         for statistic in [x for x in self.context["results"]["to_file"]["measures"].keys()
                           if self.context["results"]["to_file"]["measures"][x]]:
@@ -660,11 +660,18 @@ class Process:
         pattern_kind = self.context["pattern_kind"]
 
         if classifier_name in self.context["classifier_list"]:
-            information.build_real_outputs(self.context, classifier_name, pattern_kind)
+            information.build_real_outputs(self.context,
+                                           classifier_name,
+                                           pattern_kind)
             if self.context["ml_paradigm"] == "classification":
-                information.discretize_outputs(self.context, classifier_name, pattern_kind)
+                information.discretize_outputs(self.context,
+                                               classifier_name,
+                                               pattern_kind)
 
-        self.build_statistics(classifier_name, information, statistic_class, pattern_kind)
+        self.build_statistics(classifier_name,
+                              information,
+                              statistic_class,
+                              pattern_kind)
 
     #########################################################################
 
@@ -683,10 +690,10 @@ class Process:
 
     def basic_ensemble_information_base(self, ensemble_name_list, out_q, information):
         """
-    :param ensemble_name_list:
-    :param out_q:
-    :param information:
-    """
+        :param ensemble_name_list:
+        :param out_q:
+        :param information:
+        """
         from mullpy.statistics import Statistics
 
         statistic_class = Statistics()
@@ -742,13 +749,14 @@ class Process:
             if "classes_error" in self.context["results"] and self.context["results"]["classes_error"]["activate"]:
                 self.classes_error(classifier_name, information)
 
-            if "instances_error" in self.context["results"] and self.context["results"]["instances_error"][
-                "activate"]:
+            if "instances_error" in self.context["results"] and self.context["results"]["instances_error"]["activate"]:
                 self.instances_error(classifier_name, information)
 
-            if "learning_stability" in self.context["results"] and self.context["results"]["learning_stability"][
-                "activate"]:
-                self.learning_stability(classifier_name, information, statistic_class)
+            if "learning_stability" in self.context["results"] and \
+                    self.context["results"]["learning_stability"]["activate"]:
+                self.learning_stability(classifier_name,
+                                        information,
+                                        statistic_class)
 
             if "configuration_evaluation" in self.context["results"] and \
                     self.context["results"]["configuration_evaluation"]["activate"]:
@@ -832,7 +840,7 @@ class Process:
         for classifier_name in classifier_list:
             if self.context["classifiers"][classifier_name]["thresholds"][
                 "determine_threshold"] == 1 and self.context["classifiers"][classifier_name]["thresholds"][
-                    "threshold_kind"] != "manual":
+                "threshold_kind"] != "manual":
 
                 information = ClassifiersInfo()
                 for pattern_kind in [x for x in self.context["patterns_texts"] if x != "test"]:
@@ -952,7 +960,7 @@ class Process:
                     for x in range(len(info)):
                         for z in range(len(info[x])):
                             info[x][z] = Statistics().change_ranges(info[x][z],
-                                                                   oldMin=0, oldMax=1, newMin=-1, newMax=1)
+                                                                    oldMin=0, oldMax=1, newMin=-1, newMax=1)
 
                     self.context["classifiers"][classifier_name]["instance"]. \
                         core_learning(self.context, classifier_name,
@@ -1137,7 +1145,7 @@ class Process:
                     i,
                     (information.info[classifier_name]["continuous_outputs"][pattern_kind][0][i] * 100.),
                     # classifier_name
-                    )
+                )
                 )
             if information.info[classifier_name]["continuous_outputs"][pattern_kind][0][i] == 0.5:
                 return
@@ -1147,6 +1155,7 @@ class Process:
     def print_regression(self, classifier_name, information, pattern_kind):
 
         from mullpy.statistics import Statistics
+
         d_change_pred, d_change_true = \
             Statistics().pre_forecasting_statistic(self.context, classifier_name, information, pattern_kind)
 
@@ -1198,6 +1207,7 @@ class Process:
         """
         pattern_kind = "test"
         from mullpy.preprocess import PreProcess
+
         if len(self.context["ensemble_list"]) > 0:
             #Ensemble decision
             if len(self.context["ensemble_list"]) > 1:

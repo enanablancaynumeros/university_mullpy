@@ -6,10 +6,10 @@
 ####################################################
 import numpy as np
 
-from mullpy.auxiliar import AutoVivification
+from mullpy.auxiliar import AutoVivification, nested_dict_access
 from mullpy.statistics import Statistics
 from mullpy.classifier_info import ClassifiersInfo
-
+from functools import reduce
 #######################################################################
 
 
@@ -34,11 +34,8 @@ class Ensemble:
         for pattern_kind in pattern_kind_list:
             self._init_decision_matrix(context, ensemble_name, pattern_kind)
             self._build_decision_matrix(context, ensemble_name, information, pattern_kind)
-            if "meta_learner" in context["classifiers"][ensemble_name]:
-                if context["classifiers"][ensemble_name]["meta_learner"] is not None:
-                    self.meta_learner(context, ensemble_name, information)
-                else:
-                    raise Exception("Meta learner was not defined. Add it as a classifier name in ensemble options")
+            if nested_dict_access(["classifiers", ensemble_name, "meta_learner"], context):
+                self.meta_learner(context, ensemble_name, information)
             else:
                 self._schedule_decisions(context, ensemble_name, information, pattern_kind)
 
@@ -58,20 +55,19 @@ class Ensemble:
         """
         classes_array = context["classifiers"][ensemble_name]["classes_names"]
 
-        dim_x = len(
-            context["patterns"].patterns[ensemble_name][pattern_kind])
-        if dim_x == 0:
-            raise ValueError('The ensemble %s is not getting correctly the outputs of the classifiers' %
-                             ensemble_name)
+        dim_x = len(context["patterns"].patterns[ensemble_name][pattern_kind])
+        if not dim_x:
+            msg = 'The ensemble {} is not getting correctly the outputs of the classifiers'
+            raise ValueError(msg.format(ensemble_name))
 
         for class_text in classes_array:
-            #TODO: Fix heterogeneous classes base classifiers
+            # TODO: Fix heterogeneous classes base classifiers
             dim_y = len(
                 [classifier for classifier in context["classifiers"][ensemble_name]["classifiers"]
                  if class_text in context["classifiers"][classifier]["classes_names"]])
-            if dim_y == 0:
-                raise ValueError('The ensemble %s is not getting correctly the outputs of the classifiers' %
-                                 ensemble_name)
+            if not dim_y:
+                msg = 'The ensemble {} is not getting correctly the outputs of the classifiers'
+                raise ValueError(msg.format(ensemble_name))
             self.info[ensemble_name]["decision_matrix"][pattern_kind][class_text] = \
                 np.zeros([dim_x, dim_y], dtype=np.float16)
 
@@ -89,9 +85,10 @@ class Ensemble:
 
         if context["classifiers"][ensemble_name]["combination_rule"] == "WMV":
             self._obtain_weights(context, ensemble_name, information)
-        if context["classifiers"][ensemble_name]["combination_rule"] == "SMV" or \
-                        context["classifiers"][ensemble_name]["combination_rule"] == "WMV":
-            #Forcing the threshold to 0.5, calculate the mean, then apply the threshold
+
+        combination_rule = nested_dict_access(["classifiers", ensemble_name, "combination_rule"], context)
+        if combination_rule in ("SMV", "WMV"):
+            # Forcing the threshold to 0.5, calculate the mean, then apply the threshold
             context["classifiers"][ensemble_name]["thresholds"]["value"] = \
                 [0.5] * len(context["classifiers"][ensemble_name]["classes_names"])
 
@@ -119,7 +116,7 @@ class Ensemble:
         classes_names = context["classifiers"][ensemble_name]["classes_names"]
 
         instances_number = len(context["patterns"].patterns[ensemble_name][pattern_kind])
-        #For optimization reasons in many combinations, generate exactly the arrays we need instead a clear code
+        # For optimization reasons in many combinations, generate exactly the arrays we need instead a clear code
         information.info[ensemble_name][outputs_kind][pattern_kind] = \
             np.zeros((instances_number, outputs_number), dtype=np.float16)
         for class_index in range(len(classes_names)):
@@ -133,18 +130,22 @@ class Ensemble:
                     class_index] = combined_output
 
         if context["ml_paradigm"] == "classification" and context["execution_kind"] != "NClearning":
-        #if outputs_kind == "continuous_outputs":
-        #if "learning" not in context["execution_kind"]:
-        #if context["classifiers"][ensemble_name]["thresholds"]["determine_threshold"]:
-        #    ClassifiersInfo().automatic_threshold_determine(context, ensemble_name)
+            #if outputs_kind == "continuous_outputs":
+            #if "learning" not in context["execution_kind"]:
+            #if context["classifiers"][ensemble_name]["thresholds"]["determine_threshold"]:
+            #    ClassifiersInfo().automatic_threshold_determine(context, ensemble_name)
 
-            #Once the thresholds were calculated we must apply the criterion tie if we are in a classification context
-            #Or apply the threshold if we took the continuous outputs from the classifiers
+            # Once the thresholds were calculated we must apply the criterion tie if we are in a classification context
+            # Or apply the threshold if we took the continuous outputs from the classifiers
             instances_number = len(context["patterns"].patterns[ensemble_name][pattern_kind])
             for class_text in range(len(classes_names)):
                 for instance in range(instances_number):
-                    self._criterion_tie_threshold_application(context, ensemble_name, instance, class_text,
-                                                              pattern_kind, information)
+                    self._criterion_tie_threshold_application(context,
+                                                              ensemble_name,
+                                                              instance,
+                                                              class_text,
+                                                              pattern_kind,
+                                                              information)
 
     ####################################################
 
@@ -165,25 +166,24 @@ class Ensemble:
         instances_number = 1
         pattern_kind = "test"
 
-        #Create the patterns structure
+        # Create the patterns structure
         context["patterns"].patterns[meta_learner_name][pattern_kind] = \
             np.ndarray(shape=(instances_number, amount_classifiers * len_classes_names), dtype=np.float32, order='C')
 
-        #Feed the pattern structure with the outputs of the ensemble members
+        # Feed the pattern structure with the outputs of the ensemble members
         for class_index in range(len_classes_names):
             for instance in range(instances_number):
                 context["patterns"].patterns[meta_learner_name][pattern_kind][instance][class_index] = \
                     self.info[ensemble_name]["decision_matrix"][pattern_kind][classes_names[class_index]][instance]
 
-        #Transform the data if corresponds
-        if "transformer" in context["classifiers"][meta_learner_name]:
-            if context["classifiers"][meta_learner_name]["transformer"] is not None:
-                len_inputs = len(context["patterns"].patterns[meta_learner_name][pattern_kind][0]) - len_classes_names
-                context["patterns"].patterns[meta_learner_name][pattern_kind][0][:len_inputs] = \
-                    context["classifiers"][meta_learner_name]["transformer"].transform(
-                        context["patterns"].patterns[meta_learner_name][pattern_kind][0][:len_inputs])
+        # Transform the data if corresponds
+        if nested_dict_access(["classifiers", meta_learner_name, "transformer"], context):
+            len_inputs = len(context["patterns"].patterns[meta_learner_name][pattern_kind][0]) - len_classes_names
+            context["patterns"].patterns[meta_learner_name][pattern_kind][0][:len_inputs] = \
+                context["classifiers"][meta_learner_name]["transformer"].transform(
+                    context["patterns"].patterns[meta_learner_name][pattern_kind][0][:len_inputs])
 
-            #The output of the ensembles will be take from information.info structure
+        # The output of the ensembles will be take from information.info structure
         information.build_real_outputs(context, meta_learner_name, pattern_kind)
         information.discretize_outputs(context, meta_learner_name, pattern_kind)
 
@@ -203,7 +203,7 @@ class Ensemble:
         outputs_kind = context["classifiers"][ensemble_name]["outputs_kind"]
         for i, classifier_name in enumerate(context["classifiers"][ensemble_name]["classifiers"]):
             if context["outputs_kind"] != "validation":
-                #Test information may not exist. Just the context[patter_kind] would be built
+                # Test information may not exist. Just the context[patter_kind] would be built
                 information.build_real_outputs(context, classifier_name, "validation")
                 information.discretize_outputs(context, classifier_name, "validation")
 
@@ -219,41 +219,38 @@ class Ensemble:
 
     def combine_outputs(self, context, ensemble_name, values, class_index):
         """
-            :param value:
-            :param context:
-            :param ensemble_name:
-            """
+
+        :param context:
+        :param ensemble_name:
+        :param values:
+        :param class_index:
+        :return:
+        """
         # if "meta_learner" in context["classifiers"][ensemble_name] and \
-        #                 context["classifiers"][ensemble_name] is not None:
+        # context["classifiers"][ensemble_name] is not None:
         #     return self.meta_learner(context, ensemble_name, class_index)
-        if context["classifiers"][ensemble_name]["combination_rule"] == "mean":
-            return np.mean(values)
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "SMV":
-            return np.mean(values)
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "WMV":
-            temp = 0.0
-            for i in range(len(values)):
-                temp += (1. / np.exp(self.weights[i])) * values[i]
-            return temp
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "product":
-            return np.prod(values) / float(len(values))
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "max":
-            return np.max(values)
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "min":
-            return np.min(values)
-        elif context["classifiers"][ensemble_name]["combination_rule"] == "median":
-            return np.median(values)
+
+        combination_rule = context["classifiers"][ensemble_name]["combination_rule"]
+        combination_rules = {
+            "mean": np.mean(values),
+            "product": np.divide(np.prod(values), float(len(values))),
+            "max": np.max(values),
+            "min": np.min(values),
+            "median": np.median(values),
+            "SVM": np.mean(values),
+            "WMV": reduce(lambda w, v: (1. / np.exp(w)) * v, zip(self.weights, values))
+        }
+
+        if combination_rule not in combination_rules:
+            msg = 'Combination rule not defined. Specify a combination rule for the ensemble from the list: {}'
+            raise NameError(msg.format(",".join(combination_rules.keys())))
         else:
-            combination_rules = ["mean", "prod", "max", "min", "median", "SVM", "WMV"]
-            for combination_rule in combination_rules:
-                print(combination_rule)
-            raise NameError('Combination rule not defined. Specify a combination rule for the ensemble from'
-                            ' the list above')
+            return combination_rules.get(combination_rule)
 
     #######################################################################
 
     def _criterion_tie_threshold_application(self, context, ensemble_name, instance, output, pattern_kind, information):
-        #Apply the criterion tie when there is a draw in the ensemble decision
+        # Apply the criterion tie when there is a draw in the ensemble decision
         if context["classifiers"][ensemble_name]["criterion_tie"] == "MIN_FN":
             if information.info[ensemble_name]["continuous_outputs"][pattern_kind][instance][output] >= \
                     context["classifiers"][ensemble_name]["thresholds"]["value"][output]:
@@ -278,9 +275,9 @@ class Ensemble:
                 if context["classifiers"][ensemble_name]["outputs_kind"] == "continuous_outputs":
                     if context["outputs_kind"] != "validation":
                         for i, classifier_name in enumerate(context["classifiers"][ensemble_name]["classifiers"]):
-                            #Test information may not exist. Just the context[patter_kind] would be built
+                            # Test information may not exist. Just the context[patter_kind] would be built
                             temp_information.build_real_outputs(context, classifier_name, pattern_kind)
-                            #TODO: improve this method of stopping the recursivity
+                            # TODO: improve this method of stopping the recursivity
                     context["classifiers"][ensemble_name]["thresholds"]["determine_threshold"] = 0
                     Ensemble(context, ensemble_name, temp_information, [pattern_kind])
                     temp_information.automatic_threshold_determine(context, ensemble_name)
