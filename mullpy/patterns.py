@@ -4,12 +4,15 @@
 # <Copyright (C) 2012, 2013, 2014, 2015 Yeray Alvarez Romero>
 # This file is part of MULLPY.
 ####################################################
-from auxiliar import AutoVivification, path_exists
 import copy
-import numpy as np
 import os
 import re
 import itertools
+
+import numpy as np
+
+from mullpy.auxiliar import AutoVivification, path_exists
+
 #######################################################################
 
 

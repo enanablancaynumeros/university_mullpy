@@ -6,9 +6,11 @@
 ####################################################
 import copy
 from itertools import permutations
-from auxiliar import AutoVivification
-from statistics import Statistic
+from mullpy.statistics import Statistic
+
 import numpy as np
+
+from mullpy.auxiliar import AutoVivification
 
 
 class ClassifiersInfo:
@@ -283,7 +285,7 @@ class ClassifiersInfo:
                 self.discretize_outputs(context, classifier_name, pattern_kind)
             else:
                 self.info[classifier_name][outputs_kind][pattern_kind] = original
-                from ensembles import Ensemble
+                from mullpy.ensembles import Ensemble
 
                 Ensemble(context, classifier_name, self, [pattern_kind])
 
@@ -339,7 +341,7 @@ class ClassifiersInfo:
                 self.discretize_outputs(context, classifier_name, pattern_kind)
             else:
                 self.info[classifier_name][outputs_kind][pattern_kind] = original
-                from ensembles import Ensemble
+                from mullpy.ensembles import Ensemble
 
                 Ensemble(context, classifier_name, self, [pattern_kind])
                 #######################################################################

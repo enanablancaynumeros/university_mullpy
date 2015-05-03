@@ -4,11 +4,12 @@
 # <Copyright (C) 2012, 2013, 2014, 2015 Yeray Alvarez Romero>
 # This file is part of MULLPY.
 ####################################################
-from auxiliar import AutoVivification
 import numpy as np
-from itertools import permutations
-from statistics import Statistic
-from classifier_info import ClassifiersInfo
+
+from mullpy.auxiliar import AutoVivification
+from mullpy.statistics import Statistics
+from mullpy.classifier_info import ClassifiersInfo
+
 #######################################################################
 
 
@@ -197,7 +198,7 @@ class Ensemble:
         :param information:
         :return:
         """
-        statistic_class = Statistic()
+        statistic_class = Statistics()
         self.weights = np.zeros(len(context["classifiers"][ensemble_name]["classifiers"]))
         outputs_kind = context["classifiers"][ensemble_name]["outputs_kind"]
         for i, classifier_name in enumerate(context["classifiers"][ensemble_name]["classifiers"]):

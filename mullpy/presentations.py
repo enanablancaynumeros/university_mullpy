@@ -4,10 +4,13 @@
 # <Copyright (C) 2012, 2013, 2014, 2015 Yeray Alvarez Romero>
 # This file is part of MULLPY.
 ####################################################
-from auxiliar import AutoVivification
-import numpy as np
 import re
 import itertools
+
+import numpy as np
+
+from mullpy.auxiliar import AutoVivification
+
 ####################################################
 
 
@@ -180,7 +183,7 @@ class Presentation:
         :param info: The info structure
         :param pattern_kind: The pattern kind to work on
         """
-        from auxiliar import create_output_file
+        from mullpy.auxiliar import create_output_file
 
         pattern_kind = context["pattern_kind"]
         cross_validation = context["results"]["to_file"]["create_meta_learning_patterns"]["cross_validation"]
@@ -315,8 +318,8 @@ class Presentation:
         :param order_criteria:
         :return:
         """
-        from auxiliar import create_output_file
-        from auxiliar import summary_stats_from_file
+        from mullpy.auxiliar import create_output_file
+        from mullpy.auxiliar import summary_stats_from_file
 
         summary_recovered = AutoVivification()
         if context["results"]["to_file"]["retain_best_classifiers_in_file"]["activate"]:
@@ -732,7 +735,6 @@ class Presentation:
                 -Errors by classes
         """
         import matplotlib.pyplot as plt
-        from matplotlib import pylab
         import matplotlib
 
         parameters = AutoVivification()
@@ -869,7 +871,6 @@ class Presentation:
             ###########
             #3D FIGURE
             ###########
-            from mpl_toolkits.mplot3d import Axes3D
 
             ax = fig.add_subplot(111, projection='3d')
             ax.view_init(elev=45, azim=-50) #perspective and angle of the figure
@@ -1071,7 +1072,6 @@ class Presentation:
         """
         import matplotlib.pyplot as plt
         from matplotlib import pylab
-        import matplotlib
         #Graphic configuration
         plt.figure()
         #colors = ["m", 'g', "r", "b", "y", "#9cfd4e", '#07dcca', 'k']
@@ -1152,7 +1152,6 @@ class Presentation:
 
     def scatter(self, context, info):
         import matplotlib.pyplot as plt
-        from matplotlib import pylab
         import matplotlib
 
         for classifier_name in context["classifiers"].keys():
@@ -1278,8 +1277,6 @@ class Presentation:
     ################################################################
     def barras(self, context, stats):
         import matplotlib.pyplot as plt
-        from matplotlib import pylab
-        import matplotlib
         import numpy as np
 
         efn = [.0, 0.066, 0.168, 0.029, 0.104, 0.210, 0.03, 0.202, 0.283, 0.037, 0.099, 0.033, 0.045, 0.028, 0.050,

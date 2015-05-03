@@ -5,8 +5,9 @@
 # This file is part of MULLPY.
 ####################################################
 import numpy as np
-from patterns import Pattern
-from auxiliar import AutoVivification, path_exists
+
+from mullpy.patterns import Pattern
+from mullpy.auxiliar import AutoVivification, path_exists
 
 
 class PreProcess():
@@ -392,7 +393,7 @@ class PreProcess():
 
     @staticmethod
     def create_data_transformer(classifier_name, context, list_divided):
-        from auxiliar import check_equal_classifier_patterns
+        from mullpy.auxiliar import check_equal_classifier_patterns
 
         for pattern_kind in context["patterns_texts"]:
             for classifier_name_2 in list_divided:
@@ -472,7 +473,7 @@ class PreProcess():
     @staticmethod
     def points2series(context):
         import pandas as pd
-        from auxiliar import csv2pat
+        from mullpy.auxiliar import csv2pat
         import sys
         import os
 

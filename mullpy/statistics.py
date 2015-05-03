@@ -4,15 +4,18 @@
 # <Copyright (C) 2012, 2013, 2014, 2015 Yeray Alvarez Romero>
 # This file is part of MULLPY.
 ####################################################
-from auxiliar import AutoVivification
-import numpy as np
 import copy
 import re
 import sys
+
+import numpy as np
+
+from mullpy.auxiliar import AutoVivification
+
 ####################################################
 
 
-class Statistic:
+class Statistics:
     """
     The class where are defined all statistics functions as goodness, standard deviation or mean square error.
     All the information relative to the classifiers is saved on the class structure indexable by name
@@ -834,7 +837,7 @@ class Statistic:
         :param pattern_kind:
         :return:
         """
-        array_change_pred, array_change_true = Statistic().pre_forecasting_statistic(context,
+        array_change_pred, array_change_true = Statistics().pre_forecasting_statistic(context,
                                                                                      classifier_name,
                                                                                      information,
                                                                                      pattern_kind)

@@ -16,14 +16,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with MULLPY.  If not, see <http://www.gnu.org/licenses/>.
 ####################################################
-import numpy as np
 import copy
 import pickle
 import os
 
-from statistics import Statistic
-from classifier_info import ClassifiersInfo
-from auxiliar import AutoVivification
+from mullpy.statistics import Statistics
+
+import numpy as np
+
+from mullpy.classifier_info import ClassifiersInfo
+from mullpy.auxiliar import AutoVivification
+
+
 ####################################################
 
 
@@ -120,7 +124,7 @@ class Classifier:
         If "plot_interactive" is marked to one, a graphic is plotted and saved into a file with the same name
         of the classifier.
         """
-        statistics = Statistic()
+        statistics = Statistics()
         information = ClassifiersInfo()
 
         objective_error = context["classifiers"][classifier_name]["learning_algorithm"]["parameters"]["objective_error"]
@@ -215,7 +219,7 @@ class Classifier:
                         str(validation_error)))
 
         if context["plot_training"]["activate"]:
-            from presentations import Presentation
+            from mullpy.presentations import Presentation
 
             Presentation().learning_graphic(
                 context,

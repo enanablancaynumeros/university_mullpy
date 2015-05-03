@@ -5,8 +5,9 @@
 # This file is part of MULLPY.
 ####################################################
 import copy
-from auxiliar import AutoVivification
 import sys
+
+from mullpy.auxiliar import AutoVivification
 
 
 def batch_execution(classifier_list, batch_len,
@@ -30,7 +31,7 @@ def batch_execution(classifier_list, batch_len,
 
     if k_folds is not None and isinstance(k_folds, int):
         denominator = k_folds
-        from presentations import Presentation
+        from mullpy.presentations import Presentation
         classifier_list = list(set([Presentation.identify_cross_validation_members(x) for x in classifier_list]))
     else:
         denominator = 1
@@ -100,9 +101,7 @@ def check_pickable_process(classifier_list):
     import sys
     import pickle
     import os
-    import classifiers
-    from patterns import Pattern
-    from classifiers import Classifier
+
     counter = 0
     for i, classifier_file in enumerate(classifier_list):
         f = open(classifier_file, 'rb')

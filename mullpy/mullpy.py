@@ -8,19 +8,21 @@ import os
 import multiprocessing
 import re
 import sys
-import numpy as np
 import itertools
 import collections
 import copy
 import warnings
 
-from auxiliar import AutoVivification, path_exists
-import classifiers
-from classifier_info import ClassifiersInfo
-from patterns import Pattern
-from classifiers import Classifier
-from ensembles import Ensemble
-#######################################################################
+import numpy as np
+
+from mullpy import classifiers
+
+from mullpy.auxiliar import AutoVivification, path_exists
+import mullpy.classifiers
+from mullpy.classifier_info import ClassifiersInfo
+from mullpy.patterns import Pattern
+from mullpy.classifiers import Classifier
+from mullpy.ensembles import Ensemble
 
 
 class Process:
@@ -405,7 +407,7 @@ class Process:
 
     def data_preprocess_transformation(self, classifier_name, list_divided, pattern_kind):
         if self.context["classifiers"][classifier_name]["data_transformation"] is not None:
-            from preprocess import PreProcess
+            from mullpy.preprocess import PreProcess
 
             if "transformer" not in self.context["classifiers"][classifier_name] or \
                             self.context["classifiers"][classifier_name]["transformer"] is None:
@@ -423,7 +425,7 @@ class Process:
         ############################
         ##Extract patterns and kind#
         ############################
-        from auxiliar import check_equal_classifier_patterns
+        from mullpy.auxiliar import check_equal_classifier_patterns
         if classifier_name in self.context["classifier_list"]:
             for pattern_kind in self.context["patterns_texts"]:
                 # if not self.context["results"]["instances_error"]["activate"] and not \
@@ -685,9 +687,9 @@ class Process:
     :param out_q:
     :param information:
     """
-        from statistics import Statistic
+        from mullpy.statistics import Statistics
 
-        statistic_class = Statistic()
+        statistic_class = Statistics()
         pattern_kind = [self.context["pattern_kind"]]
         for ensemble_name, i in zip(ensemble_name_list, range(len(ensemble_name_list))):
             if i % 10 == 1 and self.context["interactive"]["activate"]:
@@ -721,10 +723,10 @@ class Process:
     #########################################################################
 
     def basic_classifier_information_base(self, classifier_name_list, out_q):
-        from statistics import Statistic
+        from mullpy.statistics import Statistics
 
         information = ClassifiersInfo()
-        statistic_class = Statistic()
+        statistic_class = Statistics()
 
         for classifier_name, i in zip(classifier_name_list, range(len(classifier_name_list))):
             if i % 10 == 1 and self.context["interactive"]["activate"]:
@@ -765,10 +767,10 @@ class Process:
     Build basic classifiers and ensembles information.
     Work with all the elements defined in the context AutoViVification structure
     """
-        from statistics import Statistic
+        from mullpy.statistics import Statistics
 
         information = ClassifiersInfo()
-        statistic_class = Statistic()
+        statistic_class = Statistics()
 
         if "weights_file" in self.context["results"] and self.context["results"]["weights_file"]["activate"]:
             #TODO: fix this function call
@@ -929,11 +931,11 @@ class Process:
     ####################################################
 
     def correlation_learning(self, ensemble_list, out_q=""):
-        from statistics import Statistic
+        from mullpy.statistics import Statistics
 
         for ensemble_name in ensemble_list:
             information = ClassifiersInfo()
-            statistics = Statistic()
+            statistics = Statistics()
             if self.context["classifiers"][ensemble_name]["outputs_kind"] == "discretized_outputs":
                 raise ValueError("Not possible to make a correlation learning with discretized outputs")
 
@@ -949,7 +951,7 @@ class Process:
                     info = information.info[ensemble_name][outputs_kind]["learning"]
                     for x in range(len(info)):
                         for z in range(len(info[x])):
-                            info[x][z] = Statistic().change_ranges(info[x][z],
+                            info[x][z] = Statistics().change_ranges(info[x][z],
                                                                    oldMin=0, oldMax=1, newMin=-1, newMax=1)
 
                     self.context["classifiers"][classifier_name]["instance"]. \
@@ -1065,7 +1067,7 @@ class Process:
                 raise NameError("Execution kind has a deployment function that does not exists."
                                 "Try with deployment_classification or deployment_regression")
         elif self.context["execution_kind"] == "preprocess":
-            from preprocess import PreProcess
+            from mullpy.preprocess import PreProcess
 
             PreProcess().schedule(self.context)
         elif self.context["execution_kind"] == "reconfiguring":
@@ -1094,7 +1096,7 @@ class Process:
     #########################################################################
 
     def schedule_results_kind(self, statistic_class, information):
-        from presentations import Presentation
+        from mullpy.presentations import Presentation
         #Build new summary results from generated information
         self.aggregated_results(statistic_class)
 
@@ -1144,9 +1146,9 @@ class Process:
 
     def print_regression(self, classifier_name, information, pattern_kind):
 
-        from statistics import Statistic
+        from mullpy.statistics import Statistics
         d_change_pred, d_change_true = \
-            Statistic().pre_forecasting_statistic(self.context, classifier_name, information, pattern_kind)
+            Statistics().pre_forecasting_statistic(self.context, classifier_name, information, pattern_kind)
 
         predicted_value = information.info[classifier_name]["continuous_outputs"][pattern_kind][0][0]
         tendency = d_change_pred[0]
@@ -1195,7 +1197,7 @@ class Process:
         Deployment execution of the intelligent system
         """
         pattern_kind = "test"
-        from preprocess import PreProcess
+        from mullpy.preprocess import PreProcess
         if len(self.context["ensemble_list"]) > 0:
             #Ensemble decision
             if len(self.context["ensemble_list"]) > 1:
