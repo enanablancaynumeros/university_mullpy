@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-# !/usr/local/bin/python3.3
+# !/usr/local/bin/python3.4
 ####################################################
 # <Copyright (C) 2012, 2013, 2014, 2015 Yeray Alvarez Romero>
 # This file is part of MULLPY.
@@ -187,7 +187,7 @@ class Process:
         else:
             import warnings
 
-            warnings.warn("Exception not controlled in function manage_write_queue_child of mullpy.py")
+            warnings.warn("Exception not controlled in function manage_write_queue_child of mullpy_core.py")
 
     #########################################################################
 
